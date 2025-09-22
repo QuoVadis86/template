@@ -1,4 +1,4 @@
-# Template
+# FastAPI Template
 
 一个简洁、开箱即用的 FastAPI 项目模板，专为内部 API 和微服务设计。
 
@@ -12,18 +12,21 @@
 - 🎯 **简约设计**: 专注于 API 开发，无多余依赖
 
 ## 📁 项目结构
+
+```
 template/
-├── main.py # 应用入口点
-├── requirements.txt # Python 依赖
-├── Dockerfile # Docker 构建配置
-├── docker-compose.yml # Docker Compose 配置
-├── .dockerignore # Docker 忽略文件
-├── .gitignore # Git 忽略文件
-├── routers/ # 路由模块
-│ ├── tasks.py # 任务相关接口
-│ ├── nodes.py # 节点状态接口
-│ └── system.py # 系统管理接口
-└── services/ # 业务逻辑服务（可选）
+├── main.py                 # 应用入口点
+├── requirements.txt        # Python 依赖
+├── Dockerfile              # Docker 构建配置
+├── docker-compose.yml      # Docker Compose 配置
+├── .dockerignore           # Docker 忽略文件
+├── .gitignore              # Git 忽略文件
+├── routers/                # 路由模块
+│   ├── tasks.py            # 任务相关接口
+│   ├── nodes.py            # 节点状态接口
+│   └── system.py           # 系统管理接口
+└── services/               # 业务逻辑服务（可选）
+```
 
 ## 🛠️ 快速开始
 
@@ -38,5 +41,98 @@ cd my-project
 docker-compose up
 
 # 访问 API 文档
-# Swagger UI: http://localhost:8000/swagger 
-# Doc: http://localhost:8000/docs 用于展示，不能调试
+# Swagger UI: http://localhost:8000/docs
+# ReDoc: http://localhost:8000/redoc
+```
+
+### 方式二：使用 Docker
+
+```bash
+# 构建镜像
+docker build -t my-fastapi-app .
+
+# 运行容器
+docker run -d -p 8000:8000 --name my-api my-fastapi-app
+```
+
+### 方式三：本地开发
+
+```bash
+# 创建虚拟环境
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 启动开发服务器
+uvicorn main:app --reload
+```
+
+## 📋 可用接口
+
+模板包含以下示例接口：
+
+- `GET /` - 根端点
+- `POST /api/v1/tasks/` - 创建任务
+- `GET /api/v1/tasks/{task_id}` - 获取任务状态
+- `GET /api/v1/nodes/` - 获取节点状态
+- `GET /api/v1/system/health` - 健康检查
+
+## 🔧 配置
+
+### 环境变量
+
+- `PORT`: 服务端口（默认: 8000）
+
+### 添加新路由
+
+1. 在 `routers/` 目录创建新文件
+2. 使用 `APIRouter()` 创建路由实例
+3. 在 `main.py` 中导入并包含路由
+
+示例：
+
+```python
+# routers/new_module.py
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/endpoint")
+async def new_endpoint():
+    return {"message": "Hello World"}
+```
+
+```python
+# main.py
+from routers import new_module
+
+app.include_router(new_module.router, prefix="/api/v1/new", tags=["new"])
+```
+
+## 🐳 生产部署
+
+### 使用 Docker
+
+```bash
+docker build -t your-registry/your-app:latest .
+docker push your-registry/your-app:latest
+```
+
+### 使用 Docker Compose
+
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+## 📝 许可证
+
+MIT License
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+⭐ 如果这个模板对你有帮助，请给它一个 Star！
