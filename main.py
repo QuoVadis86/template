@@ -13,3 +13,5 @@ app = FastAPI(
 app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tassks"])
 app.include_router(nodes.router, prefix="/api/v1/nodes", tags=["nodses"])
 app.include_router(system.router, prefix="/api/v1/system", tags=["sysstem"])
+
+# uvicorn main:app --reload --port 5000
