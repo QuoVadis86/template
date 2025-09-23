@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import tasks, nodes, system
+from routers import config
 
 app = FastAPI(
     title="Scheduler API",
@@ -10,8 +10,6 @@ app = FastAPI(
 )
 
 # 注册所有路由
-app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
-app.include_router(nodes.router, prefix="/api/v1/nodes", tags=["nodes"])
-app.include_router(system.router, prefix="/api/v1/system", tags=["system"])
+app.include_router(config.router, prefix="/api/v1/config", tags=["config"])
 
 # uvicorn main:app --reload --port 5000
