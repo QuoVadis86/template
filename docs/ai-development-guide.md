@@ -16,6 +16,10 @@ template/
 ├── docker-compose.yml      # Docker Compose 配置
 ├── .dockerignore           # Docker 忽略文件
 ├── .gitignore              # Git 忽略文件
+├── models/                 # 数据模型定义
+│   └── __init__.py         # 统一响应模型
+├── utils/                  # 工具函数
+│   └── __init__.py         # 响应处理工具
 ├── routers/                # 路由模块
 │   ├── tasks.py            # 任务相关接口
 │   ├── nodes.py            # 节点状态接口
@@ -31,16 +35,22 @@ template/
 2. 每个路由文件应使用 `APIRouter()` 创建路由实例
 3. 路由文件应专注于请求处理和响应格式化
 4. 业务逻辑应放在 `services/` 目录下
+5. 所有路由函数必须使用统一的响应格式
 
 示例路由文件结构：
 ```python
 from fastapi import APIRouter
+from models import ResponseModel
+from utils import success_response, error_response
 
 router = APIRouter()
 
-@router.get("/endpoint")
+@router.get("/endpoint", response_model=ResponseModel)
 async def endpoint_handler():
-    return {"message": "Hello World"}
+    return success_response(
+        data={"message": "Hello World"},
+        message="请求成功"
+    )
 ```
 
 ### 服务开发规范
@@ -61,6 +71,58 @@ class TaskService:
         pass
 ```
 
+## 统一响应处理
+
+项目采用统一的响应格式，所有 API 接口都必须遵循此规范。
+
+### 响应格式
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {},
+  "error": null
+}
+```
+
+字段说明：
+- `code`: 响应码（200 表示成功，其他表示错误）
+- `message`: 响应消息
+- `data`: 返回的数据
+- `error`: 错误详情（成功时为 null）
+
+### 使用方法
+
+在路由函数中，应使用预定义的工具函数来构建响应：
+
+1. 成功响应使用 `success_response()` 函数：
+```python
+from utils import success_response
+
+return success_response(
+    data={"task_id": "task_1"},
+    message="任务创建成功"
+)
+```
+
+2. 错误响应使用 `error_response()` 函数：
+```python
+from utils import error_response
+
+return error_response(
+    error="任务不存在",
+    message="获取任务失败",
+    code=404
+)
+```
+
+### 禁止行为
+
+1. 禁止在路由函数中手动构建响应结构体
+2. 禁止返回未使用统一格式的响应
+3. 禁止忽略响应模型的定义
+
 ## 开发流程
 
 ### 添加新功能的步骤
@@ -77,6 +139,7 @@ class TaskService:
    - 如果业务逻辑复杂，应在 `services/` 目录下创建相应的服务类或函数
 
 4. 确保添加适当的错误处理和数据验证
+5. 使用统一响应格式返回结果
 
 ### 路由注册
 
@@ -158,14 +221,15 @@ docker run -p 8000:8000 my-app
 1. 确定端点应属于哪个路由模块
 2. 在相应路由文件中添加处理函数
 3. 如果需要，创建相应的 Pydantic 模型用于数据验证
-4. 如果业务逻辑复杂，将其委托给服务层
+4. 使用 `success_response()` 或 `error_response()` 返回统一格式的响应
+5. 如果业务逻辑复杂，将其委托给服务层
 
 ### 扩展现有功能
 
 1. 分析现有代码结构
 2. 确定需要修改的文件
 3. 如果业务逻辑需要扩展，在服务层添加新功能
-4. 在路由层添加新的端点或修改现有端点
+4. 确保响应格式符合统一规范
 
 ## 注意事项
 
@@ -174,3 +238,4 @@ docker run -p 8000:8000 my-app
 3. 确保数据验证和错误处理的一致性
 4. 遵循现有的代码风格和命名约定
 5. 添加适当的文档注释
+6. 所有响应必须使用统一格式，禁止手动构建响应结构体

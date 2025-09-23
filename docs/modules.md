@@ -29,10 +29,37 @@ app = FastAPI(
 )
 
 # 注册所有路由
-app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tassks"])
-app.include_router(nodes.router, prefix="/api/v1/nodes", tags=["nodses"])
-app.include_router(system.router, prefix="/api/v1/system", tags=["sysstem"])
+app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
+app.include_router(nodes.router, prefix="/api/v1/nodes", tags=["nodes"])
+app.include_router(system.router, prefix="/api/v1/system", tags=["system"])
 ```
+
+### models - 数据模型目录
+
+该目录包含项目中使用的数据模型定义。
+
+#### models/__init__.py - 统一响应模型
+
+定义了项目中所有 API 接口使用的统一响应格式：
+
+- `ResponseModel`: 成功响应模型
+- `ErrorResponseModel`: 错误响应模型
+
+统一响应格式包含以下字段：
+- `code`: 响应码（200 表示成功，其他表示错误）
+- `message`: 响应消息
+- `data`: 返回的数据
+- `error`: 错误详情（成功时为 null）
+
+### utils - 工具函数目录
+
+该目录包含项目中使用的通用工具函数。
+
+#### utils/__init__.py - 响应处理工具
+
+提供便捷的响应构建函数：
+- `success_response()`: 创建成功的响应
+- `error_response()`: 创建错误的响应
 
 ### routers - 路由模块目录
 
@@ -84,6 +111,7 @@ app.include_router(system.router, prefix="/api/v1/system", tags=["sysstem"])
 - python-multipart - 处理 multipart 请求
 - python-dotenv - 环境变量加载
 - gunicorn - 生产环境 WSGI 服务器
+- pydantic - 数据验证和设置管理
 
 #### Dockerfile - Docker 镜像构建配置
 
