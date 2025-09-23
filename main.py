@@ -10,8 +10,8 @@ app = FastAPI(
 )
 
 # 注册所有路由
-app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tassks"])
-app.include_router(nodes.router, prefix="/api/v1/nodes", tags=["nodses"])
-app.include_router(system.router, prefix="/api/v1/system", tags=["sysstem"])
+app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
+app.include_router(nodes.router, prefix="/api/v1/nodes", tags=["nodes"])
+app.include_router(system.router, prefix="/api/v1/system", tags=["system"])
 
 # uvicorn main:app --reload --port 5000
