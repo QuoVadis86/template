@@ -36,21 +36,20 @@ template/
 3. 路由文件应专注于请求处理和响应格式化
 4. 业务逻辑应放在 `services/` 目录下
 5. 所有路由函数必须使用统一的响应格式
+6. 推荐使用 `@api_response` 装饰器自动处理响应格式
 
 示例路由文件结构：
 ```python
 from fastapi import APIRouter
 from models import ResponseModel
-from utils import success_response, error_response
+from utils import api_response
 
 router = APIRouter()
 
 @router.get("/endpoint", response_model=ResponseModel)
+@api_response
 async def endpoint_handler():
-    return success_response(
-        data={"message": "Hello World"},
-        message="请求成功"
-    )
+    return {"message": "Hello World"}
 ```
 
 ### 服务开发规范
@@ -94,22 +93,29 @@ class TaskService:
 
 ### 使用方法
 
-在路由函数中，应使用预定义的工具函数来构建响应：
+在路由函数中，有两种方式构建响应：
 
-1. 成功响应使用 `success_response()` 函数：
+1. 使用 `@api_response` 装饰器（推荐）：
 ```python
-from utils import success_response
+from utils import api_response
+
+@api_response
+async def create_task(task_config: dict):
+    task_id = f"task_{len(tasks_db) + 1}"
+    tasks_db[task_id] = task_config
+    return {"task_id": task_id, "status": "created"}
+```
+
+2. 手动使用 `success_response()` 和 `error_response()` 函数：
+```python
+from utils import success_response, error_response
 
 return success_response(
     data={"task_id": "task_1"},
     message="任务创建成功"
 )
-```
 
-2. 错误响应使用 `error_response()` 函数：
-```python
-from utils import error_response
-
+# 错误响应
 return error_response(
     error="任务不存在",
     message="获取任务失败",
@@ -139,7 +145,7 @@ return error_response(
    - 如果业务逻辑复杂，应在 `services/` 目录下创建相应的服务类或函数
 
 4. 确保添加适当的错误处理和数据验证
-5. 使用统一响应格式返回结果
+5. 使用统一响应格式返回结果（推荐使用 `@api_response` 装饰器）
 
 ### 路由注册
 

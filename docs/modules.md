@@ -60,6 +60,7 @@ app.include_router(system.router, prefix="/api/v1/system", tags=["system"])
 提供便捷的响应构建函数：
 - `success_response()`: 创建成功的响应
 - `error_response()`: 创建错误的响应
+- `api_response()`: 装饰器，自动处理成功和错误响应
 
 ### routers - 路由模块目录
 
