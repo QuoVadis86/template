@@ -1,6 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from models import ResponseModel
-from utils import success_response, error_response, api_response
+from utils import api_response
 
 router = APIRouter()
 
@@ -20,11 +20,7 @@ async def create_task(task_config: dict):
 async def get_task_status(task_id: str):
     """获取任务状态"""
     if task_id not in tasks_db:
-        return error_response(
-            error="task not found",
-            message="任务不存在",
-            code=404
-        )
+        raise HTTPException(status_code=404, detail="任务不存在")
     return {"task_id": task_id, "status": "running", "config": tasks_db[task_id]}
 
 @router.post("/{task_id}/stop", response_model=ResponseModel)
@@ -33,11 +29,7 @@ async def stop_task(task_id: str):
     """停止指定任务"""
     if task_id in tasks_db:
         return {"task_id": task_id, "status": "stopped"}
-    return error_response(
-        error="task not found",
-        message="任务不存在",
-        code=404
-    )
+    raise HTTPException(status_code=404, detail="任务不存在")
 
 @router.get("/", response_model=ResponseModel)
 @api_response

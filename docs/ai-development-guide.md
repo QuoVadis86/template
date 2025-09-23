@@ -40,7 +40,7 @@ template/
 
 示例路由文件结构：
 ```python
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from models import ResponseModel
 from utils import api_response
 
@@ -50,6 +50,12 @@ router = APIRouter()
 @api_response
 async def endpoint_handler():
     return {"message": "Hello World"}
+    
+@router.get("/error-endpoint", response_model=ResponseModel)
+@api_response
+async def error_endpoint_handler():
+    # 通过抛出HTTPException来处理错误
+    raise HTTPException(status_code=404, detail="资源未找到")
 ```
 
 ### 服务开发规范
@@ -93,10 +99,10 @@ class TaskService:
 
 ### 使用方法
 
-在路由函数中，有两种方式构建响应：
+在路由函数中，应使用 `@api_response` 装饰器自动处理响应：
 
-1. 使用 `@api_response` 装饰器（推荐）：
 ```python
+from fastapi import HTTPException
 from utils import api_response
 
 @api_response
@@ -104,23 +110,13 @@ async def create_task(task_config: dict):
     task_id = f"task_{len(tasks_db) + 1}"
     tasks_db[task_id] = task_config
     return {"task_id": task_id, "status": "created"}
-```
-
-2. 手动使用 `success_response()` 和 `error_response()` 函数：
-```python
-from utils import success_response, error_response
-
-return success_response(
-    data={"task_id": "task_1"},
-    message="任务创建成功"
-)
-
-# 错误响应
-return error_response(
-    error="任务不存在",
-    message="获取任务失败",
-    code=404
-)
+    
+@api_response
+async def get_task_status(task_id: str):
+    if task_id not in tasks_db:
+        # 通过抛出HTTPException来处理错误
+        raise HTTPException(status_code=404, detail="任务不存在")
+    return {"task_id": task_id, "status": "running", "config": tasks_db[task_id]}
 ```
 
 ### 禁止行为
@@ -128,6 +124,7 @@ return error_response(
 1. 禁止在路由函数中手动构建响应结构体
 2. 禁止返回未使用统一格式的响应
 3. 禁止忽略响应模型的定义
+4. 禁止手动调用 `success_response()` 和 `error_response()` 函数
 
 ## 开发流程
 

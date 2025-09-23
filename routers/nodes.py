@@ -1,6 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from models import ResponseModel
-from utils import success_response, error_response, api_response
+from utils import api_response
 
 router = APIRouter()
 
@@ -23,11 +23,7 @@ async def get_node_status(node_id: str):
     """获取特定节点状态"""
     if node_id in nodes_status:
         return nodes_status[node_id]
-    return error_response(
-        error="node not found",
-        message="节点不存在",
-        code=404
-    )
+    raise HTTPException(status_code=404, detail="节点不存在")
 
 @router.post("/{node_id}/drain", response_model=ResponseModel)
 @api_response
@@ -36,8 +32,4 @@ async def drain_node(node_id: str):
     if node_id in nodes_status:
         nodes_status[node_id]["status"] = "draining"
         return {"node_id": node_id, "status": "draining"}
-    return error_response(
-        error="node not found",
-        message="节点不存在",
-        code=404
-    )
+    raise HTTPException(status_code=404, detail="节点不存在")
