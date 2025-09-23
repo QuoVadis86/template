@@ -1,38 +1,37 @@
 from fastapi import APIRouter, HTTPException
 from models import ResponseModel
 from utils import api_response
+from services.tasks import TaskService
 
 router = APIRouter()
-
-# 模拟内存存储（实际中可能是与调度器核心通信）
-tasks_db = {}
+task_service = TaskService()
 
 @router.post("/", response_model=ResponseModel)
 @api_response
 async def create_task(task_config: dict):
     """接收任务配置，直接返回任务ID"""
-    task_id = f"task_{len(tasks_db) + 1}"
-    tasks_db[task_id] = task_config
-    return {"task_id": task_id, "status": "created"}
+    return task_service.create_task(task_config)
 
 @router.get("/{task_id}", response_model=ResponseModel)
 @api_response
 async def get_task_status(task_id: str):
     """获取任务状态"""
-    if task_id not in tasks_db:
+    try:
+        return task_service.get_task_status(task_id)
+    except KeyError:
         raise HTTPException(status_code=404, detail="任务不存在")
-    return {"task_id": task_id, "status": "running", "config": tasks_db[task_id]}
 
 @router.post("/{task_id}/stop", response_model=ResponseModel)
 @api_response
 async def stop_task(task_id: str):
     """停止指定任务"""
-    if task_id in tasks_db:
-        return {"task_id": task_id, "status": "stopped"}
-    raise HTTPException(status_code=404, detail="任务不存在")
+    try:
+        return task_service.stop_task(task_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="任务不存在")
 
 @router.get("/", response_model=ResponseModel)
 @api_response
 async def list_all_tasks():
     """列出所有任务"""
-    return {"tasks": list(tasks_db.keys())}
+    return task_service.list_all_tasks()

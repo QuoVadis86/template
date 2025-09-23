@@ -20,11 +20,15 @@ template/
 │   └── __init__.py         # 统一响应模型
 ├── utils/                  # 工具函数
 │   └── __init__.py         # 响应处理工具
+├── services/               # 业务逻辑服务
+│   ├── tasks.py            # 任务服务
+│   ├── nodes.py            # 节点服务
+│   └── system.py           # 系统服务
 ├── routers/                # 路由模块
 │   ├── tasks.py            # 任务相关接口
 │   ├── nodes.py            # 节点状态接口
 │   └── system.py           # 系统管理接口
-└── services/               # 业务逻辑服务（可选）
+└── tests/                  # 测试代码（可选）
 ```
 
 ## 开发规范
@@ -63,17 +67,56 @@ async def error_endpoint_handler():
 1. 所有业务逻辑应封装在 `services/` 目录下的服务类或函数中
 2. 服务应专注于业务逻辑实现，不直接处理 HTTP 请求/响应
 3. 服务函数应具有明确的输入和输出
+4. 服务函数不应直接返回 HTTP 响应，而应返回原始数据或抛出标准异常
+5. 服务函数应处理数据验证和业务规则
 
 示例服务结构：
 ```python
+from typing import Dict, Any
+
 class TaskService:
+    """任务服务类，处理任务相关的业务逻辑"""
+    
+    def __init__(self):
+        # 初始化数据存储或其他依赖
+        self.storage = {}
+    
     def create_task(self, config: dict) -> dict:
+        """
+        创建任务
+        
+        Args:
+            config: 任务配置
+            
+        Returns:
+            包含任务信息的字典
+        """
         # 实现业务逻辑
-        pass
+        task_id = self._generate_task_id()
+        self.storage[task_id] = config
+        return {"task_id": task_id, "status": "created"}
     
     def get_task_status(self, task_id: str) -> dict:
+        """
+        获取任务状态
+        
+        Args:
+            task_id: 任务ID
+            
+        Returns:
+            包含任务状态的字典
+            
+        Raises:
+            KeyError: 当任务不存在时
+        """
         # 实现业务逻辑
-        pass
+        if task_id not in self.storage:
+            raise KeyError("任务不存在")
+        return {"task_id": task_id, "status": "running", "config": self.storage[task_id]}
+        
+    def _generate_task_id(self) -> str:
+        """私有方法，用于生成任务ID"""
+        return f"task_{len(self.storage) + 1}"
 ```
 
 ## 统一响应处理
@@ -125,6 +168,7 @@ async def get_task_status(task_id: str):
 2. 禁止返回未使用统一格式的响应
 3. 禁止忽略响应模型的定义
 4. 禁止手动调用 `success_response()` 和 `error_response()` 函数
+5. 禁止在服务层直接处理 HTTP 相关逻辑
 
 ## 开发流程
 

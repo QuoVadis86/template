@@ -98,7 +98,29 @@ app.include_router(system.router, prefix="/api/v1/system", tags=["system"])
 
 ### services - 业务逻辑服务目录
 
-该目录用于存放业务逻辑实现代码。目前是空的，但按照项目结构设计，后续的业务逻辑应该放在这里，与路由层分离。
+该目录用于存放业务逻辑实现代码。按照项目结构设计，业务逻辑与路由层分离，便于维护和测试。
+
+#### services/tasks.py - 任务服务
+
+负责任务相关的业务逻辑：
+- `create_task()`: 创建任务
+- `get_task_status()`: 获取任务状态
+- `stop_task()`: 停止任务
+- `list_all_tasks()`: 列出所有任务
+
+#### services/nodes.py - 节点服务
+
+负责节点相关的业务逻辑：
+- `get_nodes_status()`: 获取所有节点状态
+- `get_node_status()`: 获取特定节点状态
+- `drain_node()`: 设置节点为排水模式
+
+#### services/system.py - 系统服务
+
+负责系统相关的业务逻辑：
+- `health_check()`: 健康检查
+- `get_metrics()`: 获取系统指标
+- `restart_service()`: 重启服务
 
 ### 其他配置文件
 
