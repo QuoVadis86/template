@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import config
+from routers import browser
 
 app = FastAPI(
     title="Scheduler API",
@@ -10,6 +10,6 @@ app = FastAPI(
 )
 
 # 注册所有路由
-app.include_router(config.router, prefix="/api/v1/config", tags=["config"])
+app.include_router(browser.router, prefix="/api/v1/browser", tags=["browser"])
 
 # uvicorn main:app --reload --port 5000

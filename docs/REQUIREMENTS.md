@@ -29,7 +29,7 @@
 ### 服务层设计
 ```
 services/
-├── config_service.py        # 配置管理服务
+├── browser_service.py       # 浏览器上下文服务（核心服务）
 ├── messaging_service.py     # 消息服务（私信功能）
 ├── player_service.py        # 玩家信息服务
 ├── job_service.py           # 差事信息服务
@@ -39,7 +39,7 @@ services/
 ### 路由层设计
 ```
 routers/
-├── config.py                # 配置相关路由
+├── browser.py               # 浏览器上下文相关路由
 ├── messages.py              # 消息相关路由
 ├── players.py               # 玩家相关路由
 ├── jobs.py                  # 差事相关路由
@@ -51,6 +51,7 @@ routers/
 ```json
 {
   "cookie": "用户提供的完整 cookie 字符串",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
   "last_updated": "2023-01-01T00:00:00Z"
 }
 ```

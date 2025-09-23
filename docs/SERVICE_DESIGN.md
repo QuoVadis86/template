@@ -8,7 +8,7 @@
 
 ```
 services/
-├── config_service.py        # 配置管理服务
+├── browser_service.py       # 浏览器上下文服务（核心服务）
 ├── messaging_service.py     # 消息服务（私信功能）
 ├── player_service.py        # 玩家信息服务
 ├── job_service.py           # 差事信息服务
@@ -17,18 +17,27 @@ services/
 
 ## 详细设计
 
-### 1. ConfigService - 配置管理服务
+### 1. BrowserService - 浏览器上下文服务
 
-负责处理配置管理相关的业务逻辑。
+负责管理共享的浏览器上下文，包括cookie、用户代理等信息，是所有其他服务的基础。
 
 #### 主要功能
-- 管理用户 cookie 配置
+- 管理HTTP客户端实例
+- 维护会话状态（cookie、用户代理等）
+- 提供通用的HTTP请求方法
 - 检测登录状态是否过期
-- 提供配置相关的工具方法
 
 #### 接口设计
 ```python
-class ConfigService:
+class BrowserService:
+    def __init__(self, config_path: str = "config.json"):
+        """初始化浏览器服务"""
+        pass
+    
+    def get_client(self) -> httpx.Client:
+        """获取HTTP客户端实例"""
+        pass
+    
     def set_cookie(self, cookie: str) -> None:
         """设置用户 cookie"""
         pass
@@ -37,8 +46,20 @@ class ConfigService:
         """获取当前用户 cookie"""
         pass
     
+    def set_user_agent(self, user_agent: str) -> None:
+        """设置用户代理"""
+        pass
+    
+    def get_user_agent(self) -> str:
+        """获取当前用户代理"""
+        pass
+    
     def check_login_status(self) -> dict:
         """检测登录状态是否过期"""
+        pass
+    
+    def request(self, method: str, url: str, **kwargs) -> httpx.Response:
+        """发送HTTP请求"""
         pass
     
     def save_config(self) -> None:
@@ -52,7 +73,7 @@ class ConfigService:
 
 ### 2. MessagingService - 消息服务
 
-负责处理消息发送相关的业务逻辑。
+负责处理消息发送相关的业务逻辑，依赖BrowserService提供的HTTP客户端。
 
 #### 主要功能
 - 发送私信给指定好友
@@ -61,6 +82,10 @@ class ConfigService:
 #### 接口设计
 ```python
 class MessagingService:
+    def __init__(self, browser_service: BrowserService):
+        """初始化消息服务"""
+        pass
+    
     def send_message(self, recipient: str, message: str) -> dict:
         """发送私信给指定好友"""
         pass
@@ -72,7 +97,7 @@ class MessagingService:
 
 ### 3. PlayerService - 玩家信息服务
 
-负责处理玩家信息查询相关的业务逻辑。
+负责处理玩家信息查询相关的业务逻辑，依赖BrowserService提供的HTTP客户端。
 
 #### 主要功能
 - 搜索玩家
@@ -81,6 +106,10 @@ class MessagingService:
 #### 接口设计
 ```python
 class PlayerService:
+    def __init__(self, browser_service: BrowserService):
+        """初始化玩家信息服务"""
+        pass
+    
     def search_player(self, query: str) -> list:
         """根据查询条件搜索玩家"""
         pass
@@ -92,7 +121,7 @@ class PlayerService:
 
 ### 4. JobService - 差事信息服务
 
-负责处理差事信息获取相关的业务逻辑。
+负责处理差事信息获取相关的业务逻辑，依赖BrowserService提供的HTTP客户端。
 
 #### 主要功能
 - 根据差事代码获取差事信息
@@ -101,6 +130,10 @@ class PlayerService:
 #### 接口设计
 ```python
 class JobService:
+    def __init__(self, browser_service: BrowserService):
+        """初始化差事信息服务"""
+        pass
+    
     def get_job_info(self, job_code: str) -> dict:
         """根据差事代码获取差事信息"""
         pass
@@ -113,13 +146,13 @@ class JobService:
 ## 服务依赖关系
 
 ```
-ConfigService (基础服务)
-    ├── MessagingService (依赖配置)
-    ├── PlayerService (依赖配置)
-    └── JobService (依赖配置)
+BrowserService (核心服务)
+    ├── MessagingService (依赖浏览器服务)
+    ├── PlayerService (依赖浏览器服务)
+    └── JobService (依赖浏览器服务)
 ```
 
-所有服务都需要 ConfigService 提供的配置信息来执行需要登录的操作。
+所有服务都需要 BrowserService 提供的HTTP客户端和认证信息来执行需要登录的操作。
 
 ## 配置管理
 
@@ -129,6 +162,7 @@ ConfigService (基础服务)
 ```json
 {
   "cookie": "用户提供的完整 cookie 字符串",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
   "last_updated": "2023-01-01T00:00:00Z"
 }
 ```
