@@ -69,6 +69,19 @@ class MinecraftRcon:
         """
         return self._execute_command(f"say {message}")
     
+    def send_custom_broadcast(self, sender: str, message: str) -> str:
+        """
+        向所有玩家发送自定义发送者名称的广播消息
+        
+        Args:
+            sender: 发送者名称
+            message: 要发送的消息
+            
+        Returns:
+            str: 执行结果
+        """
+        return self._execute_command(f"tellraw @a {{\"text\":\"<{sender}> {message}\"}}")
+    
     def send_private_message(self, player: str, message: str) -> str:
         """
         向指定玩家发送私信

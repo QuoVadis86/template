@@ -8,8 +8,14 @@ class BroadcastMessage(BaseModel):
     message: str
 
 
-class PrivateMessage(BroadcastMessage):
+class CustomBroadcastMessage(BaseModel):
+    sender: str
+    message: str
+
+
+class PrivateMessage(BaseModel):
     player: str
+    message: str
 
 
 class GiveItem(BaseModel):
